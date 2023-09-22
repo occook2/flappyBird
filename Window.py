@@ -1,5 +1,5 @@
 import pygame, os, time, random, math
-import Ground
+import Ground, Pipe
 
 class Window:
 
@@ -7,7 +7,7 @@ class Window:
         
         self.HEIGHT = 800
         self.WIDTH = 600
-        self.BGIMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
+        self.IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
         self.clock = pygame.time.Clock()
         self.FPS = 60
 
@@ -15,9 +15,11 @@ class Window:
 
         # Create window and transform background      
         screen = pygame.display.set_mode(size = (self.WIDTH, self.HEIGHT))
-        self.BGIMG = pygame.transform.scale(self.BGIMG, (self.BGIMG.get_width(), self.HEIGHT))
+        self.IMG = pygame.transform.scale(self.IMG, (self.IMG.get_width(), self.HEIGHT))
         pygame.display.set_caption('BirdBaby.AI')
         pygame.display.flip()
+        
+        render_width = self.WIDTH*2
         scroll = 0
 
         # Start diplaying the window
@@ -28,17 +30,20 @@ class Window:
             self.clock.tick(self.FPS)
 
             # Create multiple background images (instead of transforming width)
-            bg_tiles = math.ceil(self.WIDTH / self.BGIMG.get_width())
+            bg_tiles = math.ceil(render_width / self.IMG.get_width())
             for i in range(0, bg_tiles):
-                screen.blit(self.BGIMG, (i * self.BGIMG.get_width(),0))
+                screen.blit(self.IMG, (i * self.IMG.get_width(),0))
 
             # Initialize and display the Ground
             ground = Ground.Ground()
             ground.display(screen, self.WIDTH, scroll)
 
+            pipe = Pipe.Pipe(0)
+            pipe.display(screen, self.WIDTH, scroll)
+
             # Scroll across, each frame move 3 pixels
             scroll -= 3
-            if abs(scroll) > ground.BASEIMG.get_width():
+            if abs(scroll) > ground.IMG.get_width()*2:
                 scroll = 0
 
             # Stop displaying the window and quit the game when X is clicked
