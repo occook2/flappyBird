@@ -1,4 +1,5 @@
 import pygame, os, time, random, math
+import Ground
 
 class Window:
 
@@ -16,11 +17,10 @@ class Window:
         self.BGIMG = pygame.transform.scale(self.BGIMG, (self.WIDTH, self.HEIGHT))
         
         screen = pygame.display.set_mode(size = (self.WIDTH, self.HEIGHT))
-        pygame.display.set_caption('Flappy Bird')
+        pygame.display.set_caption('BirdBaby.AI')
         pygame.display.flip()
 
         scroll = 0
-        floor_tiles = math.ceil(self.WIDTH / self.BASEIMG.get_width()) + 1
 
         running = True
         while running:
@@ -29,11 +29,10 @@ class Window:
 
             screen.blit(self.BGIMG, (0,0))
 
-            for i in range(0, floor_tiles):
-                screen.blit(self.BASEIMG,\
-                            (i * self.BASEIMG.get_width() + scroll ,700))
+            ground = Ground.Ground()
+            ground.display(screen, self.WIDTH, scroll)
 
-            scroll -= 5
+            scroll -= 3
             if abs(scroll) > self.BASEIMG.get_width():
                 scroll = 0
 
