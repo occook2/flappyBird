@@ -1,6 +1,10 @@
 import pygame, os, time, random, math
 import Ground, Pipe
 
+# Window is used as the "Board" - will contain every object in the game
+# and ensure the rules are followed. Game will contain a window along with
+# other important information like score, etc.
+
 class Window:
 
     def __init__(self):
