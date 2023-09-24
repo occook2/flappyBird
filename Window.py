@@ -25,9 +25,12 @@ class Window:
         pygame.display.flip()
         
         render_width = self.WIDTH*2
-        scroll = 0
+        ground_scroll = 0
         random_height = 450
+        ground = Ground.Ground()
+        
         pipes = []
+        pipe_scroll = 0
 
         # Start diplaying the window
         running = True
@@ -41,29 +44,34 @@ class Window:
             for i in range(0, bg_tiles):
                 screen.blit(self.IMG, (i * self.IMG.get_width(),0))
 
-            # Create pipe, randomly generate new height every X scrolls?
+            # Create pipe every 400 pixels
+            if (abs(pipe_scroll) >= 400):
+                pipe_scroll = 0
 
-            if (scroll % (self.WIDTH/self.SCROLL_AMOUNT) == 0):
+            if (pipe_scroll == 0):
                 random_height = math.ceil(random.uniform(0,1)*250) + 300
-            pipe = Pipe.Pipe(random_height)
-            pipe.display(screen, self.WIDTH, scroll)
+                pipes.append(Pipe.Pipe(random_height))
 
-            # Initialize and display the Ground
-            ground = Ground.Ground()
-            ground.display(screen, self.WIDTH, scroll)
+            for i in reversed(range(0, len(pipes))):
+                temp_pipe_scroll = pipe_scroll - (len(pipes) - 1 - i) * 400 
+                if abs(temp_pipe_scroll) > 800:
+                    del pipes[0]
+                else:
+                    pipes[i].display(screen, self.WIDTH, temp_pipe_scroll)
+            
+            pipe_scroll -= self.SCROLL_AMOUNT
 
-            # Scroll across, each frame move 3 pixels
-            scroll -= self.SCROLL_AMOUNT
-            if abs(scroll) > ground.IMG.get_width()*2:
-                print (ground.IMG.get_width())
-                scroll = 0
+            # Display the Ground ad scroll by 3 pixels per frame
+            ground.display(screen, self.WIDTH, ground_scroll)
+            ground_scroll -= self.SCROLL_AMOUNT
+            if abs(ground_scroll) > ground.IMG.get_width()*2:
+                ground_scroll = 0
 
             # Stop displaying the window and quit the game when X is clicked
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
             pygame.display.update()
-            del pipe
-            del ground
-            
+
+        del ground   
         pygame.quit()
