@@ -15,7 +15,7 @@ class Window:
         self.IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
         self.clock = pygame.time.Clock()
         self.FPS = 60
-
+    
     def display(self):
 
         # Create window and transform background      
@@ -39,33 +39,25 @@ class Window:
             # Clock moves forward by FPS
             self.clock.tick(self.FPS)
 
-            # Create multiple background images (instead of transforming width)
+            # Background
             bg_tiles = math.ceil(render_width / self.IMG.get_width())
             for i in range(0, bg_tiles):
                 screen.blit(self.IMG, (i * self.IMG.get_width(),0))
 
-            # Create pipe every 400 pixels
+            # Pipes
             if (abs(pipe_scroll) >= 400):
                 pipe_scroll = 0
 
             if (pipe_scroll == 0):
-                random_height = math.ceil(random.uniform(0,1)*250) + 300
+                random_height = self.get_random_pipe_height()
                 pipes.append(Pipe.Pipe(random_height))
 
-            for i in reversed(range(0, len(pipes))):
-                temp_pipe_scroll = pipe_scroll - (len(pipes) - 1 - i) * 400 
-                if abs(temp_pipe_scroll) > 800:
-                    del pipes[0]
-                else:
-                    pipes[i].display(screen, self.WIDTH, temp_pipe_scroll)
-            
+            pipes = self.update_and_display_pipes(pipes, pipe_scroll, screen)
             pipe_scroll -= self.SCROLL_AMOUNT
 
-            # Display the Ground ad scroll by 3 pixels per frame
+            # Ground
             ground.display(screen, self.WIDTH, ground_scroll)
-            ground_scroll -= self.SCROLL_AMOUNT
-            if abs(ground_scroll) > ground.IMG.get_width()*2:
-                ground_scroll = 0
+            ground_scroll = self.update_ground_scroll(ground, ground_scroll)
 
             # Stop displaying the window and quit the game when X is clicked
             for event in pygame.event.get():
@@ -75,3 +67,27 @@ class Window:
 
         del ground   
         pygame.quit()
+    
+    
+    ########## GROUND HELPER FUNCTIONS ##########
+    def update_ground_scroll(self, ground, ground_scroll):
+        ground_scroll -= self.SCROLL_AMOUNT
+        if abs(ground_scroll) > ground.IMG.get_width()*2:
+            ground_scroll = 0
+        return ground_scroll
+
+    ########## PIPE HELPER FUNCTIONS ##########
+    def update_and_display_pipes(self, pipes, scroll, screen):
+        for i in reversed(range(0, len(pipes))):
+                temp_pipe_scroll = self.get_pipe_temp_scroll(pipes, scroll, i) 
+                if abs(temp_pipe_scroll) > 800:
+                    del pipes[0]
+                else:
+                    pipes[i].display(screen, self.WIDTH, temp_pipe_scroll)
+        return pipes
+    
+    def get_pipe_temp_scroll(self, pipes, scroll , pipeNum):
+        return scroll - (len(pipes) - 1 - pipeNum) * 400
+
+    def get_random_pipe_height(self):
+        return int(math.ceil(random.uniform(0,1)*250) + 300)
