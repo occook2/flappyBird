@@ -1,4 +1,4 @@
-import pygame, os, time, random, math
+import pygame, os, time, random, math, random
 import Ground, Pipe
 
 # Window is used as the "Board" - will contain every object in the game
@@ -11,6 +11,7 @@ class Window:
         
         self.HEIGHT = 800
         self.WIDTH = 600
+        self.SCROLL_AMOUNT = 3
         self.IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
         self.clock = pygame.time.Clock()
         self.FPS = 60
@@ -25,6 +26,8 @@ class Window:
         
         render_width = self.WIDTH*2
         scroll = 0
+        random_height = 450
+        pipes = []
 
         # Start diplaying the window
         running = True
@@ -38,16 +41,21 @@ class Window:
             for i in range(0, bg_tiles):
                 screen.blit(self.IMG, (i * self.IMG.get_width(),0))
 
+            # Create pipe, randomly generate new height every X scrolls?
+
+            if (scroll % (self.WIDTH/self.SCROLL_AMOUNT) == 0):
+                random_height = math.ceil(random.uniform(0,1)*250) + 300
+            pipe = Pipe.Pipe(random_height)
+            pipe.display(screen, self.WIDTH, scroll)
+
             # Initialize and display the Ground
             ground = Ground.Ground()
             ground.display(screen, self.WIDTH, scroll)
 
-            pipe = Pipe.Pipe(0)
-            pipe.display(screen, self.WIDTH, scroll)
-
             # Scroll across, each frame move 3 pixels
-            scroll -= 3
+            scroll -= self.SCROLL_AMOUNT
             if abs(scroll) > ground.IMG.get_width()*2:
+                print (ground.IMG.get_width())
                 scroll = 0
 
             # Stop displaying the window and quit the game when X is clicked
@@ -55,4 +63,7 @@ class Window:
                 if event.type == pygame.QUIT:
                     running = False
             pygame.display.update()
+            del pipe
+            del ground
+            
         pygame.quit()
