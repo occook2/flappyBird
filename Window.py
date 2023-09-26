@@ -1,5 +1,5 @@
 import pygame, os, time, random, math, random
-import Ground, Pipe
+import Ground, Pipe, Bird
 
 # Window is used as the "Board" - will contain every object in the game
 # and ensure the rules are followed. Game will contain a window along with
@@ -11,7 +11,7 @@ class Window:
         
         self.HEIGHT = 800
         self.WIDTH = 600
-        self.SCROLL_AMOUNT = 3
+        self.SCROLL_AMOUNT = 5
         self.IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
         self.clock = pygame.time.Clock()
         self.FPS = 60
@@ -31,6 +31,8 @@ class Window:
         
         pipes = []
         pipe_scroll = 0
+
+        bird = Bird.Bird(125, 400)
 
         # Start diplaying the window
         running = True
@@ -59,16 +61,24 @@ class Window:
             ground.display(screen, self.WIDTH, ground_scroll)
             ground_scroll = self.update_ground_scroll(ground, ground_scroll)
 
+            # Bird
+            bird.move()
+            bird.display(screen)
+
             # Stop displaying the window and quit the game when X is clicked
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        bird.jump()
+
             pygame.display.update()
 
         del ground   
         pygame.quit()
     
-    
+
     ########## GROUND HELPER FUNCTIONS ##########
     def update_ground_scroll(self, ground, ground_scroll):
         ground_scroll -= self.SCROLL_AMOUNT
