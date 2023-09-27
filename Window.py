@@ -14,7 +14,7 @@ class Window:
         self.SCROLL_AMOUNT = 5
         self.IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
         self.clock = pygame.time.Clock()
-        self.FPS = 60
+        self.FPS = 30
     
     def display(self):
 
