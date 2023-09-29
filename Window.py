@@ -14,7 +14,10 @@ class Window:
         self.SCROLL_AMOUNT = 5
         self.IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
         self.clock = pygame.time.Clock()
-        self.FPS = 30
+        self.FPS = 60
+
+        self.bird = Bird.Bird(125, 400)
+        self.pipes = []
     
     def display(self):
 
@@ -29,10 +32,7 @@ class Window:
         random_height = 450
         ground = Ground.Ground()
         
-        pipes = []
         pipe_scroll = 0
-
-        bird = Bird.Bird(125, 400)
 
         # Start diplaying the window
         running = True
@@ -41,29 +41,41 @@ class Window:
             # Clock moves forward by FPS
             self.clock.tick(self.FPS)
 
-            # Background
+            # Background Display
             bg_tiles = math.ceil(render_width / self.IMG.get_width())
             for i in range(0, bg_tiles):
                 screen.blit(self.IMG, (i * self.IMG.get_width(),0))
 
-            # Pipes
+            # Pipes Update and Display
             if (abs(pipe_scroll) >= 400):
                 pipe_scroll = 0
 
             if (pipe_scroll == 0):
                 random_height = self.get_random_pipe_height()
-                pipes.append(Pipe.Pipe(random_height))
+                self.pipes.append(Pipe.Pipe(600, random_height))
 
-            pipes = self.update_and_display_pipes(pipes, pipe_scroll, screen)
+            self.pipes = self.update_and_display_pipes(self.pipes, self.SCROLL_AMOUNT, screen)
             pipe_scroll -= self.SCROLL_AMOUNT
 
-            # Ground
+            # Ground Update and Display
             ground.display(screen, self.WIDTH, ground_scroll)
             ground_scroll = self.update_ground_scroll(ground, ground_scroll)
 
-            # Bird
-            bird.move()
-            bird.display(screen)
+            # Bird Update and Display
+            self.bird.move()
+            self.bird.display(screen)
+
+            # Collision Detection
+            bird_mask = pygame.mask.from_surface(self.bird.IMGS[0])
+            pipe_masks = self.get_pipe_masks(self.pipes)
+
+            # Need each pipe_mask to associate to a pipe IMG
+            for pipe_mask in pipe_masks:
+                
+                if bird_mask.overlap(pipe_mask[0], (self.bird.x - pipe_mask[1].x, \
+                                                     pipe_mask[2])):
+                    print("Bird at 0")
+                
 
             # Stop displaying the window and quit the game when X is clicked
             for event in pygame.event.get():
@@ -71,7 +83,7 @@ class Window:
                     running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        bird.jump()
+                        self.bird.jump()
 
             pygame.display.update()
 
@@ -88,16 +100,19 @@ class Window:
 
     ########## PIPE HELPER FUNCTIONS ##########
     def update_and_display_pipes(self, pipes, scroll, screen):
-        for i in reversed(range(0, len(pipes))):
-                temp_pipe_scroll = self.get_pipe_temp_scroll(pipes, scroll, i) 
-                if abs(temp_pipe_scroll) > 800:
-                    del pipes[0]
-                else:
-                    pipes[i].display(screen, self.WIDTH, temp_pipe_scroll)
+        for pipe in pipes:
+                pipe.move(scroll) 
+                pipe.display(screen)
+                if pipe.x < 0:
+                    del pipe
         return pipes
     
-    def get_pipe_temp_scroll(self, pipes, scroll , pipeNum):
-        return scroll - (len(pipes) - 1 - pipeNum) * 400
-
     def get_random_pipe_height(self):
         return int(math.ceil(random.uniform(0,1)*250) + 300)
+    
+    def get_pipe_masks(self, pipes):
+        pipe_masks = []
+        for pipe in pipes:
+            pipe_masks.append((pygame.mask.from_surface(pipe.IMG_bottom), pipe, pipe.bottom_y))
+            pipe_masks.append((pygame.mask.from_surface(pipe.IMG_top), pipe, pipe.top_y))
+        return pipe_masks
