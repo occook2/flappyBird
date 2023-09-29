@@ -15,6 +15,7 @@ class Window:
         self.IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
         self.clock = pygame.time.Clock()
         self.FPS = 60
+        self.score = 0
 
         self.bird = Bird.Bird(125, 400)
         self.pipes = []
@@ -69,13 +70,18 @@ class Window:
             bird_mask = pygame.mask.from_surface(self.bird.IMGS[0])
             pipe_masks = self.get_pipe_masks(self.pipes)
 
-            # Need each pipe_mask to associate to a pipe IMG
             for pipe_mask in pipe_masks:
                 
                 if bird_mask.overlap(pipe_mask[0], (self.bird.x - pipe_mask[1].x, \
-                                                     pipe_mask[2])):
-                    print("Bird at 0")
+                                                     self.bird.y - pipe_mask[2])):
+                    running = False
                 
+            # Score Update
+            for pipe in self.pipes:
+                if self.bird.x > pipe.x + pipe.IMG_top.get_width() and pipe.passed == False:
+                    self.score += 1
+                    pipe.passed = True
+                    
 
             # Stop displaying the window and quit the game when X is clicked
             for event in pygame.event.get():
@@ -89,6 +95,7 @@ class Window:
 
         del ground   
         pygame.quit()
+        print("Final Score is " + str(self.score))
     
 
     ########## GROUND HELPER FUNCTIONS ##########
@@ -113,6 +120,6 @@ class Window:
     def get_pipe_masks(self, pipes):
         pipe_masks = []
         for pipe in pipes:
-            pipe_masks.append((pygame.mask.from_surface(pipe.IMG_bottom), pipe, pipe.bottom_y))
-            pipe_masks.append((pygame.mask.from_surface(pipe.IMG_top), pipe, pipe.top_y))
+            pipe_masks.append((pygame.mask.from_surface(pipe.IMG_bottom), pipe, pipe.bottom_y + 600))
+            pipe_masks.append((pygame.mask.from_surface(pipe.IMG_top), pipe, pipe.top_y + 600))
         return pipe_masks
