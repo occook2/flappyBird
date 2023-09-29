@@ -11,16 +11,14 @@ class Bird:
         self.y = y
         self.vel = 0
         self.tick_count = 0
-        self.height = self.y
         self.img_count  = 0
-        self.gravity = 0.04
+        self.gravity = 0.1
 
     def display(self, screen):
         screen.blit(self.IMGS[self.img_count], (self.x, self.y))
 
     def jump(self):
-        self.vel = -1.1
-        self.height = self.y
+        self.vel = -2
         self.tick_count = 0
 
     def move(self):
