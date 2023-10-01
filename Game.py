@@ -12,4 +12,8 @@ class Game:
 
         window = Window.Window()
 
+        running = True
+        while (running):
+            running = False
+
         window.display(self.birds, self.pipes, self.score)
