@@ -5,15 +5,23 @@ class Bird:
     IMGS = [pygame.image.load(os.path.join('imgs', 'bird1.png')), \
             pygame.image.load(os.path.join('imgs', 'bird2.png')), \
             pygame.image.load(os.path.join('imgs', 'bird3.png'))]
+    START_HEIGHT = 400
+    X = 125
 
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self):
+        self.x = self.X
+        self.y = self.START_HEIGHT
         self.vel = 0
+        self.gravity = 0.1
+
         self.tick_count = 0
         self.img_count  = 0
-        self.gravity = 0.1
+        
         self.curr_img = self.IMGS[0]
+        self.mask = pygame.mask.from_surface(self.curr_img)
+
+        self.alive = True
+        self.score = 0
 
     def display(self, screen):
         screen.blit(self.IMGS[self.img_count], (self.x, self.y))

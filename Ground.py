@@ -1,4 +1,4 @@
-import pygame, os, time, random, math
+import pygame, os, math
 
 class Ground:
     
@@ -6,12 +6,19 @@ class Ground:
 
     def __init__(self):
         self.IMG = pygame.image.load(os.path.join('imgs', 'base.png'))
+        self.mask = pygame.mask.Mask((600, 100))
+        self.x = 0
     
     # Displays the Ground object
-    def display(self, screen, window_width, scroll):
+    def display(self, screen, window_width):
         floor_tiles = math.ceil(window_width*2 / self.IMG.get_width()) + 1
 
         for i in range(0, floor_tiles):
                 screen.blit(self.IMG,\
-                            (i * self.IMG.get_width() + scroll ,700))
+                            (i * self.IMG.get_width() + self.x ,700))
+                
+    def move(self, scroll):
+         self.x -= scroll
+         if (self.x < -600):
+              self.x = 0
                 
