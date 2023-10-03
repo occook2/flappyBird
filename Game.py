@@ -8,14 +8,15 @@ class Game:
     SCROLL_AMOUNT = 5
     FPS = 60
 
-    def __init__(self, birds):
+    def __init__(self, birds, gen):
         self.clock = pygame.time.Clock()
-        self.birds = birds
+        self.window = Window.Window(self.HEIGHT, self.WIDTH)
+        self.ground = Ground.Ground()
         self.pipes = []
         self.pipe_clock = 0
 
-        self.window = Window.Window(self.HEIGHT, self.WIDTH)
-        self.ground = Ground.Ground()
+        self.birds = birds
+        self.gen = gen
 
         self.score = 0
 

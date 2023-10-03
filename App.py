@@ -6,7 +6,7 @@ def main():
     # Flappy Bird through trial and error. This should run the trials
     
     birds = [Bird.Bird()]
-    game = Game.Game(birds)
+    game = Game.Game(birds, 0)
     game.play()
 
 if __name__ == "__main__":
