@@ -1,5 +1,5 @@
-import pygame
-import Window, Pipe, Ground
+import pygame, neat
+import Window, Pipe, Ground, Bird
 
 class Game:
 
@@ -8,19 +8,30 @@ class Game:
     SCROLL_AMOUNT = 5
     FPS = 60
 
-    def __init__(self, birds, gen):
+    def __init__(self):
         self.clock = pygame.time.Clock()
         self.window = Window.Window(self.HEIGHT, self.WIDTH)
         self.ground = Ground.Ground()
         self.pipes = []
         self.pipe_clock = 0
 
-        self.birds = birds
-        self.gen = gen
+        self.birds = []
 
         self.score = 0
 
-    def play(self):
+    def play(self, genomes, config):
+
+        nets = []
+        ge = []
+
+        for g in genomes:
+            net = neat.nn.FeedForwardNetwork(g, config)
+            nets.append(net)
+
+            g.fitness = 0
+            ge.append(g)
+
+            self.birds.append(Bird.Bird())
 
         pygame.display.set_caption('BirdBaby.AI')
         pygame.display.flip()
@@ -38,12 +49,24 @@ class Game:
             pygame.display.update()
             
             # Test Collisions 
-            for bird in self.birds:
+            for x, bird in enumerate(self.birds):
                 for pipe in self.pipes:
                     if self.is_collision(bird, pipe):
-                        running = False
+                        ge[x].fitness -= 1
+                        self.birds.pop(x)
+                        nets.pop(x)
+                        ge.pop(x)
+
+                    if not pipe.passed and bird.x > pipe.x: # Change Pipe to Passed
+                        for g in ge:
+                            g.fitness += 5
+                        pipe.passed = True
+                
                 if self.ground_collision(bird):
-                    running = False
+                    ge[x].fitness -= 1
+                    self.birds.pop(x)
+                    nets.pop(x)
+                    ge.pop(x)
 
             # Game Event Handler - Will need to connect to AI somehow
             for event in pygame.event.get():
