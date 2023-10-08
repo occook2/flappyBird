@@ -24,8 +24,8 @@ class Game:
         nets = []
         ge = []
 
-        for g in genomes:
-            net = neat.nn.FeedForwardNetwork(g, config)
+        for _, g in genomes:
+            net = neat.nn.FeedForwardNetwork.create(g, config)
             nets.append(net)
 
             g.fitness = 0
@@ -41,6 +41,13 @@ class Game:
             # Update Game Clock
             self.clock.tick(self.FPS)
 
+            # Exit Game Option
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.quit()
+                    quit()
+
             # Update Game State
             self.update_game_state()
 
@@ -52,31 +59,36 @@ class Game:
             for x, bird in enumerate(self.birds):
                 for pipe in self.pipes:
                     if self.is_collision(bird, pipe):
-                        ge[x].fitness -= 1
-                        self.birds.pop(x)
-                        nets.pop(x)
-                        ge.pop(x)
+                        self.delete_bird_and_neural_net(x, self.birds, nets, ge)
 
-                    if not pipe.passed and bird.x > pipe.x: # Change Pipe to Passed
+                    if not pipe.passed and bird.x > pipe.x + pipe.IMG_top.get_width(): # Change Pipe to Passed
                         for g in ge:
                             g.fitness += 5
                         pipe.passed = True
                 
-                if self.ground_collision(bird):
-                    ge[x].fitness -= 1
-                    self.birds.pop(x)
-                    nets.pop(x)
-                    ge.pop(x)
+                if self.ground_and_ceiling_collision(bird):
+                    self.delete_bird_and_neural_net(x, self.birds, nets, ge)
 
-            # Game Event Handler - Will need to connect to AI somehow
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        self.birds[0].jump()
-   
-        pygame.quit()
+            # Provide Input to Neural Nets and Receive Outputs
+            # Input Position of next Pipe
+            next_pipe = 0
+            if len(self.birds) > 0:
+                for pipe in self.pipes:
+                    if pipe.passed:
+                        next_pipe += 1
+            else:
+                running = False
+                break
+
+            for x, bird in enumerate(self.birds):
+                ge[x].fitness += 0.1  # Every frame gives a small amount of fitness
+
+                output = nets[x].activate((bird.y, \
+                                          abs(bird.y - (self.pipes[next_pipe].height + self.pipes[next_pipe].gap/2)), \
+                                          abs(bird.y - (self.pipes[next_pipe].height - self.pipes[next_pipe].gap/2))))
+
+                if output[0] > 0.5:
+                    self.birds[x].jump()
     
     ########## UPDATE GAME STATE HEPER FUNCTIONS ##########
     def update_game_state(self):
@@ -111,5 +123,13 @@ class Game:
         return bird.mask.overlap(pipe.mask_top, (bird.x - pipe.x, bird.y - pipe.top_y - 600 + bird.curr_img.get_height())) \
         or bird.mask.overlap(pipe.mask_bottom, (bird.x - pipe.x, bird.y - pipe.bottom_y - 600 + bird.curr_img.get_height()))
     
-    def ground_collision(self, bird):
-        return bird.y >= 700 - bird.curr_img.get_height()
+    def ground_and_ceiling_collision(self, bird):
+        return bird.y >= 700 - bird.curr_img.get_height() or bird.y < 0
+    
+    ########## AI HELPER FUNCTIONS ##########
+
+    def delete_bird_and_neural_net(self, index, birds, nns, fitnesses):
+        fitnesses[index].fitness -= 1
+        fitnesses.pop(index)
+        birds.pop(index)
+        nns.pop(index)

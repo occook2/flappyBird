@@ -28,8 +28,8 @@ class Window:
 
         # Bird Update and Display
         for bird in birds:
-            bird.display(self.screen)        
-    
+            bird.display(self.screen)
+ 
     ########## BACKGROUND HELPER FUNCTIONS ##########
     def background_display(self, screen, render_width):
         bg_tiles = math.ceil(render_width / self.IMG.get_width())
@@ -50,3 +50,6 @@ class Window:
             pipe_masks.append((pygame.mask.from_surface(pipe.IMG_bottom), pipe, pipe.bottom_y + 600))
             pipe_masks.append((pygame.mask.from_surface(pipe.IMG_top), pipe, pipe.top_y + 600))
         return pipe_masks
+    
+
+    ########## STATS DISPLAY HELPER FUNCTIONS ##########

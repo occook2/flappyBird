@@ -11,19 +11,22 @@ def main():
     run(config_path)
 
 def run(config_file):
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat>DefaultSpeciesSet, \
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, \
                          neat.DefaultStagnation, config_file)
     
     # Create Population
     pop = neat.Population(config)
 
     # Optional - Show detailed statistics about each generation of Birds
-    pop.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReport()
-    pop.add_reporter(stats)
+    #pop.add_reporter(neat.StdOutReporter(True))
+    #stats = neat.StatisticsReport()
+    #pop.add_reporter(stats)
 
+    winner = pop.run(play, 50)
+
+def play(genomes, config):
     game = Game.Game()
-    winner = pop.run(game.play(genomes, config), 50)
+    game.play(genomes,config)
 
 if __name__ == "__main__":
     main()
