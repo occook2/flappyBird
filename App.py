@@ -1,4 +1,4 @@
-import os, neat
+import os, neat, visualize
 import Game, Bird
 
 def main():
@@ -11,7 +11,7 @@ def main():
     run(config_path)
 
 def run(config_file):
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat>DefaultSpeciesSet, \
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, \
                          neat.DefaultStagnation, config_file)
     
     # Create Population
@@ -19,7 +19,7 @@ def run(config_file):
 
     # Optional - Show detailed statistics about each generation of Birds
     pop.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReport()
+    stats = neat.StatisticsReporter()
     pop.add_reporter(stats)
 
     game = Game.Game()
