@@ -23,7 +23,11 @@ def run(config_file):
     pop.add_reporter(stats)
 
     game = Game.Game()
-    winner = pop.run(game.play(genomes, config), 50)
+    winner = pop.run(play, 50)
+
+def play(genomes, config):
+    game = Game.Game()
+    game.play(genomes, config)
 
 if __name__ == "__main__":
     main()

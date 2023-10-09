@@ -12,7 +12,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.window = Window.Window(self.HEIGHT, self.WIDTH)
         self.ground = Ground.Ground()
-        self.pipes = []
+        self.pipes = [Pipe.Pipe(self.WIDTH)]
         self.pipe_clock = 0
 
         self.birds = []
@@ -24,23 +24,48 @@ class Game:
         nets = []
         ge = []
 
-        for g in genomes:
-            net = neat.nn.FeedForwardNetwork(g, config)
+        for genome_id, genome in genomes:
+            genome.fitness = 0  # start with fitness level of 0
+            net = neat.nn.FeedForwardNetwork.create(genome, config)
             nets.append(net)
-
-            g.fitness = 0
-            ge.append(g)
-
             self.birds.append(Bird.Bird())
+            ge.append(genome)
 
         pygame.display.set_caption('BirdBaby.AI')
         pygame.display.flip()
 
         running = True
-        while (running):
+        while running and len(self.birds) > 0:
             # Update Game Clock
             self.clock.tick(self.FPS)
 
+            # Game Event Handler - Will need to connect to AI somehow
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.quit()
+                    quit()
+                    break
+            
+            # Find next pipe
+            pipe_ind = 0
+            if len(self.birds) > 0:
+                for x, pipe in enumerate(self.pipes):
+                    if not pipe.passed:
+                        pipe_ind = x
+                        break
+            
+            test = False
+            for x, bird in enumerate(self.birds):
+                ge[x].fitness += 0.1
+                bird.move()
+
+                output = nets[self.birds.index(bird)].activate((bird.y, \
+                                                           abs(bird.y - self.pipes[pipe_ind].height), \
+                                                           abs(bird.y - self.pipes[pipe_ind].bottom_y)))
+                if output[0] > 0.5:
+                    bird.jump()                  
+    
             # Update Game State
             self.update_game_state()
 
@@ -61,6 +86,8 @@ class Game:
                         for g in ge:
                             g.fitness += 5
                         pipe.passed = True
+                        self.pipes.append(Pipe.Pipe(self.WIDTH))
+                        self.score += 1
                 
                 if self.ground_collision(bird):
                     ge[x].fitness -= 1
@@ -68,19 +95,10 @@ class Game:
                     nets.pop(x)
                     ge.pop(x)
 
-            # Game Event Handler - Will need to connect to AI somehow
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        self.birds[0].jump()
-   
         pygame.quit()
     
     ########## UPDATE GAME STATE HEPER FUNCTIONS ##########
     def update_game_state(self):
-        self.update_birds()
         self.update_pipes()
         self.update_ground()
 
@@ -94,13 +112,6 @@ class Game:
             pipe.move(self.SCROLL_AMOUNT)
             if pipe.x < 0:
                 del pipe
-        
-        # Add new pipe and reset pipe_clock
-        if (abs(self.pipe_clock) >= 400):
-                self.pipe_clock = 0
-        if (self.pipe_clock == 0):
-            self.pipes.append(Pipe.Pipe(self.WIDTH))
-        self.pipe_clock = self.pipe_clock + self.SCROLL_AMOUNT
 
     def update_ground(self):
         self.ground.move(self.SCROLL_AMOUNT)
