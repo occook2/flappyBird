@@ -12,7 +12,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.window = Window.Window(self.HEIGHT, self.WIDTH)
         self.ground = Ground.Ground()
-        self.pipes = []
+        self.pipes = [Pipe.Pipe(self.WIDTH)]
         self.pipe_clock = 0
 
         self.birds = []
@@ -48,6 +48,27 @@ class Game:
                     pygame.quit()
                     quit()
 
+            # Provide Input to Neural Nets and Receive Outputs
+            next_pipe = 0
+            if len(self.birds) > 0:
+                for x, pipe in enumerate(self.pipes):
+                    if not pipe.passed:
+                        next_pipe = x
+                        break
+            else:
+                running = False
+                break
+
+            for x, bird in enumerate(self.birds):
+                ge[x].fitness += 0.1  # Every frame gives a small amount of fitness
+
+                output = nets[x].activate((bird.y, \
+                                          abs(bird.y - (self.pipes[next_pipe].height)), \
+                                          abs(bird.y - (self.pipes[next_pipe].height + self.pipes[next_pipe].gap))))
+
+                if output[0] > 0.98:
+                    self.birds[x].jump()
+
             # Update Game State
             self.update_game_state()
 
@@ -59,36 +80,24 @@ class Game:
             for x, bird in enumerate(self.birds):
                 for pipe in self.pipes:
                     if self.is_collision(bird, pipe):
-                        self.delete_bird_and_neural_net(x, self.birds, nets, ge)
+                        ge[x].fitness -= 1
+                        ge.pop(x)
+                        self.birds.pop(x)
+                        nets.pop(x)
 
                     if not pipe.passed and bird.x > pipe.x + pipe.IMG_top.get_width(): # Change Pipe to Passed
                         for g in ge:
                             g.fitness += 5
                         pipe.passed = True
+                        self.pipes.append(Pipe.Pipe(self.WIDTH))
                 
                 if self.ground_and_ceiling_collision(bird):
-                    self.delete_bird_and_neural_net(x, self.birds, nets, ge)
+                    ge[x].fitness -= 1
+                    ge.pop(x)
+                    self.birds.pop(x)
+                    nets.pop(x)
 
-            # Provide Input to Neural Nets and Receive Outputs
-            # Input Position of next Pipe
-            next_pipe = 0
-            if len(self.birds) > 0:
-                for pipe in self.pipes:
-                    if pipe.passed:
-                        next_pipe += 1
-            else:
-                running = False
-                break
-
-            for x, bird in enumerate(self.birds):
-                ge[x].fitness += 0.1  # Every frame gives a small amount of fitness
-
-                output = nets[x].activate((bird.y, \
-                                          abs(bird.y - (self.pipes[next_pipe].height + self.pipes[next_pipe].gap/2)), \
-                                          abs(bird.y - (self.pipes[next_pipe].height - self.pipes[next_pipe].gap/2))))
-
-                if output[0] > 0.5:
-                    self.birds[x].jump()
+           
     
     ########## UPDATE GAME STATE HEPER FUNCTIONS ##########
     def update_game_state(self):
@@ -107,11 +116,6 @@ class Game:
             if pipe.x < 0:
                 del pipe
         
-        # Add new pipe and reset pipe_clock
-        if (abs(self.pipe_clock) >= 400):
-                self.pipe_clock = 0
-        if (self.pipe_clock == 0):
-            self.pipes.append(Pipe.Pipe(self.WIDTH))
         self.pipe_clock = self.pipe_clock + self.SCROLL_AMOUNT
 
     def update_ground(self):

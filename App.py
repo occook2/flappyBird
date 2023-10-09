@@ -18,9 +18,9 @@ def run(config_file):
     pop = neat.Population(config)
 
     # Optional - Show detailed statistics about each generation of Birds
-    #pop.add_reporter(neat.StdOutReporter(True))
-    #stats = neat.StatisticsReport()
-    #pop.add_reporter(stats)
+    pop.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    pop.add_reporter(stats)
 
     winner = pop.run(play, 50)
 

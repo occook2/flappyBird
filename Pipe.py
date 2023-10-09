@@ -33,8 +33,8 @@ class Pipe:
     
     ########## HELPER FUNCTIONS ##########
     def set_pipe_IMG_heights(self, height, gap):
-        self.bottom_y = 800 - height + gap/2
-        self.top_y = 800 - height - gap/2 - self.IMG_top.get_height()
+        self.bottom_y = height + gap
+        self.top_y = height - self.IMG_top.get_height()
 
     def get_random_pipe_height(self):
-        return int(math.ceil(random.uniform(0,1)*250) + 300)
+        return int(math.ceil(random.uniform(0,1)*250) + 150)
