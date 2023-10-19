@@ -24,51 +24,50 @@ class Game:
         nets = []
         ge = []
 
-        for _, g in genomes:
-            net = neat.nn.FeedForwardNetwork.create(g, config)
+        for genome_id, genome in genomes:
+            genome.fitness = 0  # start with fitness level of 0
+            net = neat.nn.FeedForwardNetwork.create(genome, config)
             nets.append(net)
-
-            g.fitness = 0
-            ge.append(g)
-
             self.birds.append(Bird.Bird())
+            ge.append(genome)
 
         pygame.display.set_caption('BirdBaby.AI')
         pygame.display.flip()
 
         running = True
-        while (running):
+        frame_num = 0
+        while running and len(self.birds) > 0:
             # Update Game Clock
             self.clock.tick(self.FPS)
-
-            # Exit Game Option
+            frame_num += 1
+            # Game Event Handler - Will need to connect to AI somehow
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                     pygame.quit()
                     quit()
-
-            # Provide Input to Neural Nets and Receive Outputs
-            next_pipe = 0
+                    break
+            
+            # Find next pipe
+            pipe_ind = 0
             if len(self.birds) > 0:
                 for x, pipe in enumerate(self.pipes):
                     if not pipe.passed:
-                        next_pipe = x
+                        pipe_ind = x
                         break
-            else:
-                running = False
-                break
-
+            
+            test = False
             for x, bird in enumerate(self.birds):
-                ge[x].fitness += 0.1  # Every frame gives a small amount of fitness
+                ge[x].fitness += 0.1
+                bird.move()
 
-                output = nets[x].activate((bird.y, \
-                                          abs(bird.y - (self.pipes[next_pipe].height)), \
-                                          abs(bird.y - (self.pipes[next_pipe].height + self.pipes[next_pipe].gap))))
-
-                if output[0] > 0.98:
-                    self.birds[x].jump()
-
+                output = nets[self.birds.index(bird)].activate((bird.y, \
+                                                           abs(bird.y - self.pipes[pipe_ind].height), \
+                                                           abs(bird.y - self.pipes[pipe_ind].bottom_y), \
+                                                           self.pipes[pipe_ind].vel))
+                if output[0] > 0.75:
+                    bird.jump()                  
+    
             # Update Game State
             self.update_game_state()
 
@@ -81,27 +80,30 @@ class Game:
                 for pipe in self.pipes:
                     if self.is_collision(bird, pipe):
                         ge[x].fitness -= 1
-                        ge.pop(x)
                         self.birds.pop(x)
                         nets.pop(x)
+                        ge.pop(x)
 
-                    if not pipe.passed and bird.x > pipe.x + pipe.IMG_top.get_width(): # Change Pipe to Passed
+                    if not pipe.passed and bird.x > pipe.x: # Change Pipe to Passed
                         for g in ge:
                             g.fitness += 5
                         pipe.passed = True
                         self.pipes.append(Pipe.Pipe(self.WIDTH))
+                        self.score += 1
                 
-                if self.ground_and_ceiling_collision(bird):
+                if self.ground_collision(bird):
                     ge[x].fitness -= 1
-                    ge.pop(x)
                     self.birds.pop(x)
                     nets.pop(x)
+                    ge.pop(x)
+            
+            if self.score > 50:
+                break
 
-           
+        pygame.quit()
     
     ########## UPDATE GAME STATE HEPER FUNCTIONS ##########
     def update_game_state(self):
-        self.update_birds()
         self.update_pipes()
         self.update_ground()
 
@@ -115,8 +117,6 @@ class Game:
             pipe.move(self.SCROLL_AMOUNT)
             if pipe.x < 0:
                 del pipe
-        
-        self.pipe_clock = self.pipe_clock + self.SCROLL_AMOUNT
 
     def update_ground(self):
         self.ground.move(self.SCROLL_AMOUNT)
@@ -127,13 +127,5 @@ class Game:
         return bird.mask.overlap(pipe.mask_top, (bird.x - pipe.x, bird.y - pipe.top_y - 600 + bird.curr_img.get_height())) \
         or bird.mask.overlap(pipe.mask_bottom, (bird.x - pipe.x, bird.y - pipe.bottom_y - 600 + bird.curr_img.get_height()))
     
-    def ground_and_ceiling_collision(self, bird):
+    def ground_collision(self, bird):
         return bird.y >= 700 - bird.curr_img.get_height() or bird.y < 0
-    
-    ########## AI HELPER FUNCTIONS ##########
-
-    def delete_bird_and_neural_net(self, index, birds, nns, fitnesses):
-        fitnesses[index].fitness -= 1
-        fitnesses.pop(index)
-        birds.pop(index)
-        nns.pop(index)

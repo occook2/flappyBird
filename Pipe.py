@@ -17,6 +17,9 @@ class Pipe:
         self.mask_top = pygame.mask.from_surface(self.IMG_bottom)
         self.passed = False
 
+        self.vel = int(math.ceil(random.uniform(0,4)))
+        
+
         self.set_pipe_IMG_heights(self.height, self.gap)
     
     def display(self, screen):
@@ -26,6 +29,10 @@ class Pipe:
     # Will decrease the x coordinate of the pipe
     def move(self, scroll):
         self.x -= scroll
+        if self.height > 410 or self.height < 140:
+            self.vel = -self.vel
+        self.height += self.vel
+        self.set_pipe_IMG_heights(self.height, self.gap)
 
     def get_mask(self):
         return (pygame.mask.from_surface(self.IMG_bottom), \
