@@ -7,7 +7,7 @@ def main():
     # Flappy Bird through trial and error. This should run the trials
     
     local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, "config-feedforward.txt")
+    config_path = os.path.join(local_dir, "..", "config-feedforward.txt")
     run(config_path)
 
 def run(config_file):

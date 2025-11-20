@@ -11,7 +11,7 @@ class Pipe:
         self.bottom_y = 0
         self.top_y = 0
         self.gap = 175
-        self.IMG_bottom = pygame.image.load(os.path.join('imgs', 'long pipe.png'))
+        self.IMG_bottom = pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'long pipe.png'))
         self.mask_bottom = pygame.mask.from_surface(self.IMG_bottom)
         self.IMG_top = pygame.transform.flip(self.IMG_bottom, False, True)
         self.mask_top = pygame.mask.from_surface(self.IMG_bottom)

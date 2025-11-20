@@ -2,9 +2,9 @@ import pygame, os
 
 class Bird:
 
-    IMGS = [pygame.image.load(os.path.join('imgs', 'bird1.png')), \
-            pygame.image.load(os.path.join('imgs', 'bird2.png')), \
-            pygame.image.load(os.path.join('imgs', 'bird3.png'))]
+    IMGS = [pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bird1.png')), \
+            pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bird2.png')), \
+            pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bird3.png'))]
     START_HEIGHT = 400
     X = 125
 

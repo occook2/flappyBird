@@ -1,11 +1,11 @@
-import pygame, os, math, visualize
+import pygame, os, math
 
 class Window:
 
     HEIGHT = 800
     WIDTH = 600
     SCROLL_AMOUNT = 5
-    IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
+    IMG = pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bg.png'))
     FPS = 60
 
     def __init__(self, height, width):

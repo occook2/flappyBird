@@ -5,7 +5,7 @@ class Ground:
     # Initializes the Ground object
 
     def __init__(self):
-        self.IMG = pygame.image.load(os.path.join('imgs', 'base.png'))
+        self.IMG = pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'base.png'))
         self.mask = pygame.mask.Mask((600, 100))
         self.x = 0
     
