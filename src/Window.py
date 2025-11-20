@@ -5,7 +5,7 @@ class Window:
     HEIGHT = 800
     WIDTH = 600
     SCROLL_AMOUNT = 5
-    IMG = pygame.image.load(os.path.join('imgs', 'bg.png'))
+    IMG = pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bg.png'))
     FPS = 60
 
     def __init__(self, height, width):
@@ -28,8 +28,13 @@ class Window:
 
         # Bird Update and Display
         for bird in birds:
-            bird.display(self.screen)        
-    
+            bird.display(self.screen)
+        
+        pygame.font.init()
+        STAT_FONT = pygame.font.SysFont("comicsans", 50)
+        score_label = STAT_FONT.render("Score: " + str(score),1,(255,255,255))
+        self.screen.blit(score_label, (self.width - score_label.get_width() - 15, 10))
+ 
     ########## BACKGROUND HELPER FUNCTIONS ##########
     def background_display(self, screen, render_width):
         bg_tiles = math.ceil(render_width / self.IMG.get_width())
@@ -50,3 +55,6 @@ class Window:
             pipe_masks.append((pygame.mask.from_surface(pipe.IMG_bottom), pipe, pipe.bottom_y + 600))
             pipe_masks.append((pygame.mask.from_surface(pipe.IMG_top), pipe, pipe.top_y + 600))
         return pipe_masks
+    
+
+    ########## STATS DISPLAY HELPER FUNCTIONS ##########

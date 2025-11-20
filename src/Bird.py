@@ -2,9 +2,9 @@ import pygame, os
 
 class Bird:
 
-    IMGS = [pygame.image.load(os.path.join('imgs', 'bird1.png')), \
-            pygame.image.load(os.path.join('imgs', 'bird2.png')), \
-            pygame.image.load(os.path.join('imgs', 'bird3.png'))]
+    IMGS = [pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bird1.png')), \
+            pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bird2.png')), \
+            pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'bird3.png'))]
     START_HEIGHT = 400
     X = 125
 
@@ -12,7 +12,7 @@ class Bird:
         self.x = self.X
         self.y = self.START_HEIGHT
         self.vel = 0
-        self.gravity = 0.1
+        self.gravity = 0.5
 
         self.tick_count = 0
         self.img_count  = 0
@@ -27,7 +27,7 @@ class Bird:
         screen.blit(self.IMGS[self.img_count], (self.x, self.y))
 
     def jump(self):
-        self.vel = -2
+        self.vel = -5
         self.tick_count = 0
 
     def move(self):

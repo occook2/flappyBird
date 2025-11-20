@@ -11,11 +11,14 @@ class Pipe:
         self.bottom_y = 0
         self.top_y = 0
         self.gap = 175
-        self.IMG_bottom = pygame.image.load(os.path.join('imgs', 'long pipe.png'))
+        self.IMG_bottom = pygame.image.load(os.path.join(os.path.dirname(__file__), '..', 'imgs', 'long pipe.png'))
         self.mask_bottom = pygame.mask.from_surface(self.IMG_bottom)
         self.IMG_top = pygame.transform.flip(self.IMG_bottom, False, True)
         self.mask_top = pygame.mask.from_surface(self.IMG_bottom)
         self.passed = False
+
+        self.vel = int(math.ceil(random.uniform(0,4)))
+        
 
         self.set_pipe_IMG_heights(self.height, self.gap)
     
@@ -26,6 +29,10 @@ class Pipe:
     # Will decrease the x coordinate of the pipe
     def move(self, scroll):
         self.x -= scroll
+        if self.height > 410 or self.height < 140:
+            self.vel = -self.vel
+        self.height += self.vel
+        self.set_pipe_IMG_heights(self.height, self.gap)
 
     def get_mask(self):
         return (pygame.mask.from_surface(self.IMG_bottom), \
@@ -33,8 +40,8 @@ class Pipe:
     
     ########## HELPER FUNCTIONS ##########
     def set_pipe_IMG_heights(self, height, gap):
-        self.bottom_y = 800 - height + gap/2
-        self.top_y = 800 - height - gap/2 - self.IMG_top.get_height()
+        self.bottom_y = height + gap
+        self.top_y = height - self.IMG_top.get_height()
 
     def get_random_pipe_height(self):
-        return int(math.ceil(random.uniform(0,1)*250) + 300)
+        return int(math.ceil(random.uniform(0,1)*250) + 150)
